@@ -1,0 +1,82 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>News Portal</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="{% static 'CSS/Style.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-default">
+  <b>
+  <div class="container" dir="rtl">
+    
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+		<li><a href="/ContactUs/">ارتباط با ما</a></li>
+		<li><a href="/Login/">ورود به سیستم</a></li>
+		<li class="dropdown" >
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">لیست موضوعی اخبار
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+			{% for section in Sections %}
+			<li><a href="/ShowNewsSection/{{ section.id }}">{{ section.Stitle }}</a></li>
+			{% endfor %}
+        </ul>
+		</li>
+		<li><a href="/">خانه</a></li>
+      </ul>
+    </div>
+  </div>
+  </b>
+</nav>
+
+<!-- First Container -->
+<div class="container-fluid bg-1 text-center">
+  <b><h3 class="margin">پرتال خبری جامع ایران</h3></b>
+  <p dir=rtl>این پرتال خبری به منظور جمع آوری و ارائه سریعترین اخبار با رعایت امانت و صحت اخبار خدمت رسانی می نماید.</p>
+  <p dir=rtl>پرتال جهت پروژه ی درس طراحی نرم افزارهای امن طراحی و پیاده سازی گردیده است</p>
+  </a>
+</div>
+
+<!-- Second Container -->
+<div class="container-fluid bg-2 text-center">
+	{% for sec in secname %}
+	<b><h3 class="margin">خبرهای بخش {{ sec.Stitle}}</h3></b>
+	{% endfor %}
+</div>
+
+
+<!-- Third Container (Grid) -->
+<div class="container-fluid bg-3 text-center">
+	{% for post in posts %}
+		<div>
+		<h3>* <a href="/ShowNewsDetail/{{post.id}}">{{ post.title }}</a></h3>
+		<p>date: {{ post.date }}</p>
+		</div>
+		<hr/>
+	{% empty %}
+			<p>هیچ خبری در این بخش خبری موجود نمی باشد. <a href="/">لطفاً به خانه بازگردید</a></p>
+	{% endfor %}
+  
+</div>
+
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+  <p>پرتال خبری ویژه پروژه ی امنیت نرم افزار</p> 
+  <p>توسعه داده شده توسط</p> 
+  <p><a>مسعود مقدسیان، محمدرضا شامانی</a></p> 
+</footer>
+
+</body>
+</html>

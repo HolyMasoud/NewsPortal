@@ -1,0 +1,60 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>User Portal</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="{% static 'CSS/Style.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-default">
+  <b>
+  <div class="container" dir="rtl">
+    
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+		<li><a href="/Logout/">خروج</a></li>
+		<li><a href="/">خانه</a></li>
+      </ul>
+    </div>
+  </div>
+  </b>
+</nav>
+
+<!-- First Container -->
+<div class="container-fluid bg-1 text-center">
+  <h3>خوش آمدید</h3>
+  <ul >
+		<li><a href="/UsersList/">مدیریت کاربران</a></li>
+		<li><a href="/SectionList/">مدیریت بخش های خبری</a></li>
+		<li><a href="/NewsList/">مدیریت اخبار و نظرات</a></li>
+		<li><a href="/ChangePass/">تغییر رمز عبور</a></li>
+  </ul>
+</div>
+
+<!-- Second Container -->
+<div class="container-fluid bg-2 text-center">
+  
+</div>
+
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+  <p>پرتال خبری ویژه پروژه ی امنیت نرم افزار</p> 
+  <p>توسعه داده شده توسط</p> 
+  <p><a>مسعود مقدسیان، محمدرضا شامانی</a></p> 
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>News Portal</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="{% static 'CSS/Style.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-default">
+  <b>
+  <div class="container" dir="rtl">
+    
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav navbar-right">
+		<li><a href="/ContactUs/">ارتباط با ما</a></li>
+		<li><a href="/Login/">ورود به سیستم</a></li>
+		<li class="dropdown" >
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">لیست موضوعی اخبار
+        <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+			{% for section in Sections %}
+			<li><a href="/ShowNewsSection/{{ section.id }}">{{ section.Stitle }}</a></li>
+			{% endfor %}
+        </ul>
+		</li>
+		<li><a href="/">خانه</a></li>
+      </ul>
+    </div>
+  </div>
+  </b>
+</nav>
+
+<!-- First Container -->
+<div class="container-fluid bg-1 text-center">
+  <b><h3 class="margin">پرتال خبری جامع ایران</h3></b>
+  <p dir=rtl>این پرتال خبری به منظور جمع آوری و ارائه سریعترین اخبار با رعایت امانت و صحت اخبار خدمت رسانی می نماید.</p>
+  <p dir=rtl>پرتال جهت پروژه ی درس طراحی نرم افزارهای امن طراحی و پیاده سازی گردیده است</p>
+  </a>
+</div>
+
+<!-- Second Container -->
+<div class="container-fluid bg-2 text-center">
+	{% for lastnews in LastNews %}
+	  <h3 class="margin">آخرین خبر</h3>
+	  <img src="{% static 'CSS/Resource/Mig.jpg' %}" class="img-responsive img-circle margin" style="display:inline" alt="عکس در دسترس نیست!" width="250" height="250">
+	  <h3 dir=rtl>{{ lastnews.title}}</h3>
+	{% endfor %}
+</div>
+
+<!-- Third Container (Grid) -->
+<div class="container-fluid bg-3 text-center">    
+  <h3 class="margin">دسته بندی موضوعی اخبار</h3><br>
+  <div class="row">
+    <div class="col-sm-4">
+	  <p class="titr">ورزشی</p>
+      <p>اخبار ورزشی را در این قسمت مشاهده نمایید</p>
+      <img src="{% static 'CSS/Resource/Run-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+    <div class="col-sm-4"> 
+	  <p class="titr">سیاسی</p>
+      <p>اخبار سیاسی را در این قسمت مشاهده نمایید</p>
+      <img src="{% static 'CSS/Resource/Books-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+    <div class="col-sm-4"> 
+	  <p class="titr">اقتصادی</p>
+      <p>اخبار اقتصادی را در این قسمت مطالعه نمایید</p>
+      <img src="{% static 'CSS/Resource/Signal-Bars 1-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-sm-4">
+	  <p class="titr">فرهنگی</p>
+      <p>اخبار فرهنگی را در این قسمت مشاهده فرمایید</p>
+      <img src="{% static 'CSS/Resource/Video-Camera-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+    <div class="col-sm-4"> 
+	  <p class="titr">گردشگری</p>
+      <p>اخبار گردشگری را در این قسمت مشاهده فرمایید</p>
+      <img src="{% static 'CSS/Resource/Map-Location-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+    <div class="col-sm-4"> 
+	  <p class="titr">تکنولوژی</p>
+      <p>اخبار تکنولوژی را در این قسمت مشاهده فرمایید</p>
+      <img src="{% static 'CSS/Resource/Internet Explorer-128.png' %}" class="img-responsive margin" alt="Image" width="150" height="150">
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="container-fluid bg-4 text-center">
+  <p>پرتال خبری ویژه پروژه ی امنیت نرم افزار</p> 
+  <p>توسعه داده شده توسط</p> 
+  <p><a>مسعود مقدسیان، محمدرضا شامانی</a></p> 
+</footer>
+
+</body>
+</html>
