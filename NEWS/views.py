@@ -13,15 +13,16 @@ import sqlite3
 
 #disabling csrf (cross site request forgery)
 @csrf_exempt
-
+# Main Page #######################################################################################
 #Show Main Page
-def HomePage(request):
+def Homepage(request):
 	Sections = NewsSection.objects.order_by('id')
 	MaxID = News.objects.aggregate(maxid = Max('id'))['maxid']
 	LastNews = News.objects.filter(id = MaxID)
 	context_dict = { 'Sections' : Sections, 'LastNews': LastNews}
 	return render(request, 'Homepage.html', context_dict)
 
+# Main NEWS Part ##################################################################################
 #Show All News in Specific Section
 def ShowNewsSection(request, offset):	
 	try:
@@ -46,80 +47,189 @@ def ShowNewsDetail(request, offset):
 	context_dict = { 'posts' : posts, 'comments': comments, 'Sections': Sections}
 	return render(request, 'ShowNewsDetail.html', context_dict)
 
+# User Mgmt #######################################################################################
 #Show Login Page
 def Login(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		
+		#Log
+		userx = Users.objects.filter(username = uname).first()
+		log = Logs(UID = userx, eventname = "Login Success." ,eventdetail = "User Logged in Successfully.")
+		log.save()
+		
+		return render(request, 'Profile.html', {'username': uname})
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+#Show Login Error Page
+def LoginError(request):
 	Sections = NewsSection.objects.order_by('id')
-	random = randint(1, 9)
-	context_dict = {'Sections': Sections, 'Random': random}
-	return render(request, 'Login.html', context_dict)
-	
-#Show Contact Page
-def ContactUs(request):
-	Sections = NewsSection.objects.order_by('id')
-	return render(request, 'ContactUs.html', {'Sections': Sections})
+	context_dict = {'Sections': Sections}
+	return render(request, 'LoginError.html', context_dict)
 
 #Show User Profile
 def Profile(request):
-	Isadmin = False
+	#IsAdmin = True
+	#IsWriter = False
 	if request.method == 'POST':
         #getting values from post
 		uname = request.POST.get('username')
-		password = request.POST.get('password')
+		passwd = request.POST.get('password')
 		llogin = timezone.now()
 		
-		#Check in DB for User
-		conn = sqlite3.connect('NewsPortal.sqlite')
-		c = conn.cursor()		
-		
-		c.execute('''SELECT COUNT(*) FROM NEWS_users Where username=? AND password=?''', (uname, password))
-		result = c.fetchone() #retrieve the first row
-		
-		
-		c.execute('''SELECT COUNT(*) FROM NEWS_users Where username=? AND password=? AND isadmin=?''', (uname, password, '1'))
-		admin_result = c.fetchone() #retrieve the first row
-		#return HttpResponse("Row Count: %d" % admin_result[0])
-		conn.close()
-		
-		if admin_result[0] == 1:
-			Isadmin = True
-		
-		if result[0] == 1:
-			urname = request.POST.get('username')
-			#set LastLogin to current timezone
-			Users.objects.filter(username=urname).update(lastlogin=llogin)
-			
-		
-			context = {
-				'username': uname,
-				'Is_admin': Isadmin
-				}
-		
-			#getting our showdata template
-			template = loader.get_template('profile.html')
-		
-			#returing the template 
-			return HttpResponse(template.render(context, request))
+		#Check User Exist
+		ExistUser = Users.objects.filter(username = uname, password=passwd)
+		if not ExistUser:
+			#if user not exist
+			template = loader.get_template('LoginError.html')
+			return HttpResponse(template.render())
 		else:
-			return render_to_response('login_error.html')
+			#set LastLogin to current timezone
+			Users.objects.filter(username = uname).update(lastlogin = llogin)
+			user = Users.objects.filter(username = uname).get()
+			request.session['username'] = user.username
+			request.session['id'] = user.id
+			
+						
+			context_dict = {'username': uname} #, 'Is_admin': IsAdmin, 'Is_writer': IsWriter
+			return render(request, 'Profile.html', context_dict)
+			
 	
 	else:
         #if post request is not true 
         #returing the form template 
-		template = loader.get_template('login.html')
+		template = loader.get_template('Login.html')
 		return HttpResponse(template.render())
 		
 #Show User List Page
 def UsersList(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		
+		IsAdmin = Users.objects.filter(username = uname).get()
+		if IsAdmin.isadmin == 1:
+			UserList = Users.objects.order_by('id')
+			context_dict = { 'userlist' : UserList, 'username': uname}
+			return render(request, 'UsersList.html', context_dict)
+		else:
+			context_dict = {'username': uname}
+			return render(request, 'AccessDenied.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+#Add user
+def UserAdd(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		if request.method == 'POST':
+			#getting values from post
+			uname = request.POST.get('username')
+			upass = request.POST.get('password')
+			uemail = request.POST.get('email')
+			user = Users(username = uname, password = upass, email = uemail, isadmin = '0')
+			user.save()
+			
+			#Log
+			userx = Users.objects.filter(username = uname).first()
+			log = Logs(UID = userx, eventname = "Add User." ,eventdetail = "A User Account add to system successfully.")
+			log.save()
+		
+		UserList = Users.objects.order_by('id')
+		context_dict = { 'userlist' : UserList, 'username':request.session['username']}
+		return render(request, 'UsersList.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+	
+#Delete user
+def UserDel(request, offset):
+	try:
+		offset = int(offset)
+	except ValueError:
+		raise Http404()
+	
+	Users.objects.filter(id = offset).delete()
+	
 	UserList = Users.objects.order_by('id')
-	context_dict = { 'userlist' : UserList}
+	context_dict = { 'userlist' : UserList, 'username':request.session['username']}
 	return render(request, 'UsersList.html', context_dict)
 
+#Change Passwd
+def ChangePass(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID =  request.session['id']
+		
+		if request.method == 'POST':
+			#getting values from post
+			passwd1 = request.POST.get('password1')
+			passwd2 = request.POST.get('password2')
+			
+			if passwd1 == passwd2 and passwd1 != '':
+				chpasswd = Users.objects.filter(id = UID).update(password = passwd1)
+				Result = 1
+				
+				#Log
+				userx = Users.objects.filter(username = uname).first()
+				log = Logs(UID = userx, eventname = "Password Change." ,eventdetail = "User Change Password Successfully.")
+				log.save()
+				
+			else:
+				Result = 0
+					
+			context_dict = { 'Result': Result, 'username': request.session['username']}
+			return render(request, 'ChangePass.html', context_dict)
+		else:
+			context_dict = {'username': request.session['username']}
+			return render(request, 'ChangePass.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random, 'username': request.session['username']}
+		return render(request, 'Login.html', context_dict)
+		
+	
+	Sections = NewsSection.objects.order_by('id')
+	MaxID = News.objects.aggregate(maxid = Max('id'))['maxid']
+	LastNews = News.objects.filter(id = MaxID)
+	context_dict = { 'Sections' : Sections, 'LastNews': LastNews}
+	return render(request, 'ChangePass.html', context_dict)	
+
+# News Section Mgmt ###############################################################################
 #Show Section List Page
 def SectionList(request):
-	SectionsList = NewsSection.objects.order_by('id')
-	UserList = Users.objects.order_by('id')
-	context_dict = { 'Sections' : SectionsList, 'userlist' : UserList}
-	return render(request, 'SectionList.html', context_dict)
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		
+		IsAdmin = Users.objects.filter(username = uname).get()
+		if IsAdmin:
+			SectionsList = NewsSection.objects.order_by('id')
+			UserList = Users.objects.order_by('id')
+			context_dict = { 'Sections' : SectionsList, 'userlist' : UserList, 'username':request.session['username']}
+			return render(request, 'SectionList.html', context_dict)
+		else:
+			context_dict = {'username': uname}
+			return render(request, 'AccessDenied.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
 
 #Section delete
 def SectionDel(request, offset):
@@ -128,47 +238,280 @@ def SectionDel(request, offset):
 	except ValueError:
 		raise Http404()
 	
-	NewsSection.objects.filter(id = offset).delete()
+	if request.session.has_key('username'):
+		uname = request.session['username']
 	
-	SectionsList = NewsSection.objects.order_by('id')
-	UserList = Users.objects.order_by('id')
-	context_dict = { 'Sections' : SectionsList, 'userlist' : UserList}
-	return render(request, 'SectionList.html', context_dict)
+		NewsSection.objects.filter(id = offset).delete()
+		
+		#Log
+		userx = Users.objects.filter(username = uname).first()
+		log = Logs(UID = userx, eventname = "News Section Deleted." ,eventdetail = "Administrator of System Delete a news section successfully.")
+		log.save()
+		
+		SectionsList = NewsSection.objects.order_by('id')
+		UserList = Users.objects.order_by('id')
+		context_dict = { 'Sections' : SectionsList, 'userlist' : UserList, 'username':request.session['username']}
+		return render(request, 'SectionList.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
 	
 #Section Add
 def SectionAdd(request):
-	if request.method == 'POST':
-        #getting values from post
-		secname = request.POST.get('secname')
-		check = request.POST.get('checks')
-		selecteduser = Users.objects.filter(id = check).first()
-		section = NewsSection(Stitle = secname, SAdmin = selecteduser )
-		section.save()
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		
+		if request.method == 'POST':
+			#getting values from post
+			secname = request.POST.get('secname')
+			check = request.POST.get('checks')
+			selecteduser = Users.objects.filter(id = check).first()
+			section = NewsSection(Stitle = secname, SAdmin = selecteduser )
+			section.save()
+			
+			#Log
+			userx = Users.objects.filter(username = uname).first()
+			log = Logs(UID = userx, eventname = "Add News Section." ,eventdetail = "A news Section added by Administrator.")
+			log.save()
+		
+		SectionsList = NewsSection.objects.order_by('id')
+		UserList = Users.objects.order_by('id')
+		context_dict = { 'Sections' : SectionsList, 'userlist' : UserList, 'username':request.session['username']}
+		return render(request, 'SectionList.html', context_dict)
 	
-	SectionsList = NewsSection.objects.order_by('id')
-	UserList = Users.objects.order_by('id')
-	context_dict = { 'Sections' : SectionsList, 'userlist' : UserList}
-	return render(request, 'SectionList.html', context_dict)
-	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+# News Mgmt #######################################################################################
 #Show News List Page
-#Need Session
 def NewsList(request):
-	Sections = NewsSection.objects.order_by('id')
-	allnews = News.objects.order_by('id')
-	context_dict = { 'Sections' : Sections, 'allnews': allnews}
-	return render(request, 'NewsList.html', context_dict)	
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		IsAdmin = NewsSection.objects.filter(SAdmin = UID).first()
+		if IsAdmin:
+			Sections = NewsSection.objects.filter(SAdmin = UID).all()
+			allnews = News.objects.filter(writerID = UID).all()
+			context_dict = { 'allnews': allnews, 'username':request.session['username'], 'Sections': Sections}
+			return render(request, 'NewsList.html', context_dict)	
+		else:
+			context_dict = {'username': uname, 'username':request.session['username']}
+			return render(request, 'AccessDenied.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
 
-#Change Passwd
-##Need Session
-def ChangePass(request):
-	Sections = NewsSection.objects.order_by('id')
-	MaxID = News.objects.aggregate(maxid = Max('id'))['maxid']
-	LastNews = News.objects.filter(id = MaxID)
-	context_dict = { 'Sections' : Sections, 'LastNews': LastNews}
-	return render(request, 'ChangePass.html', context_dict)	
+#Add News
+def NewsAdd(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		if request.method == 'POST':
+        #getting values from post
+			newstitle = request.POST.get('newstitle')
+			newstext = request.POST.get('newstext')
+			check = request.POST.get('checks')
+			selectedsection = NewsSection.objects.filter(id = check).first()
+			user = Users.objects.filter(id = UID).first()
+			news = News(title = newstitle, text = newstext, writerID = user, sectionID = selectedsection )
+			news.save()
+			
+			#Log
+			userx = Users.objects.filter(username = uname).first()
+			log = Logs(UID = userx, eventname = "Add News." ,eventdetail = "A news added by Users.")
+			log.save()
+		
+			IsAdmin = NewsSection.objects.filter(SAdmin = UID).first()
+			if IsAdmin:
+				Sections = NewsSection.objects.filter(SAdmin = UID).all()
+				allnews = News.objects.filter(writerID = UID).all()
+				context_dict = { 'allnews': allnews, 'username':request.session['username'], 'Sections': Sections}
+				return render(request, 'NewsList.html', context_dict)	
+			else:
+				context_dict = {'username': uname, 'username':request.session['username']}
+				return render(request, 'AccessDenied.html', context_dict)
+	
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+	
+#Delete NEWS
+def NewsDel(request, offset):
+	try:
+		offset = int(offset)
+	except ValueError:
+		raise Http404()
+	
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		
+		News.objects.filter(id = offset).delete()
+		
+		#Log
+		userx = Users.objects.filter(username = uname).first()
+		log = Logs(UID = userx, eventname = "Delete News." ,eventdetail = "A news Deleted by Users.")
+		log.save()
+		
+		UID = request.session['id']
+		IsAdmin = NewsSection.objects.filter(SAdmin = UID).first()
+		if IsAdmin:
+			Sections = NewsSection.objects.filter(SAdmin = UID).all()
+			allnews = News.objects.filter(writerID = UID).all()
+			context_dict = { 'allnews': allnews, 'username':request.session['username'], 'Sections': Sections}
+			return render(request, 'NewsList.html', context_dict)	
+		else:
+			context_dict = {'username': uname, 'username':request.session['username']}
+			return render(request, 'AccessDenied.html', context_dict)
+		
+		
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
 
-#Add Comment to Post
-def AddComment(request, offset):
+#Edit NEWS
+def NewsEdit(request, offset):
+	try:
+		offset = int(offset)
+	except ValueError:
+		raise Http404()
+		
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		news = News.objects.filter(id = offset)
+		IsAdmin = News.objects.filter(writerID = UID).first()
+		if IsAdmin:
+			context_dict = { 'news': news, 'username':request.session['username']}
+			return render(request, 'NewsEdit.html', context_dict)	
+		else:
+			context_dict = {'username': uname, 'username':request.session['username']}
+			return render(request, 'AccessDenied.html', context_dict)
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+#Edit NEWS Final
+def NewsEditFinal(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		if request.method == 'POST':
+        #getting values from post
+			newstitle = request.POST.get('newstitle')
+			newstext = request.POST.get('newstext')
+			newsid = request.POST.get('ID')
+			
+			IsAdmin = News.objects.filter(id = newsid, writerID = UID).first()
+			if IsAdmin:
+				newsupdate = News.objects.filter(id = newsid).update(title = newstitle, text = newstext)
+				newsupdate.save()
+				
+				#Log
+				userx = Users.objects.filter(username = uname).first()
+				log = Logs(UID = userx, eventname = "Edit News." ,eventdetail = "A news Edited by Users.")
+				log.save()
+				
+				Sections = NewsSection.objects.filter(SAdmin = UID).all()
+				allnews = News.objects.filter(writerID = UID).all()
+				context_dict = { 'allnews': allnews, 'username':request.session['username'], 'Sections': Sections}
+				return render(request, 'NewsList.html', context_dict)	
+			else:
+				context_dict = {'username': uname, 'username':request.session['username']}
+				return render(request, 'AccessDenied.html', context_dict)
+		
+		else:
+			#nothing
+			raise Http404()
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+# Comment Mgmt ####################################################################################
+#Show Comments List Page
+def CommentsList(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		
+		IsAdmin = NewsSection.objects.filter(SAdmin = UID).first()
+		if IsAdmin:
+			allcomments = Comments.objects.filter(NID = News.objects.filter(writerID = UID).all())
+				
+			context_dict = {'username':request.session['username'], 'allcomments': allcomments}
+			return render(request, 'CommentsList.html', context_dict)	
+		else:
+			context_dict = {'username': uname, 'username':request.session['username']}
+			return render(request, 'AccessDenied.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+#Delete Comment
+def CommentsDel(request, offset):
+	try:
+		offset = int(offset)
+	except ValueError:
+		raise Http404()
+	
+	if request.session.has_key('username'):
+		uname = request.session['username']
+		UID = request.session['id']
+		IsAdmin = NewsSection.objects.filter(SAdmin = UID).first()
+		
+		selectedcomment = Comments.objects.filter(id = offset).first()
+		snews = News.objects.filter(writerID = UID).first()
+		
+		if selectedcomment.NID == snews:
+			scomment = Comments.objects.filter(id = offset).delete()
+			
+			#Log
+			userx = Users.objects.filter(username = uname).first()
+			log = Logs(UID = userx, eventname = "Delete Comment." ,eventdetail = "A Comment Deleted by Users.")
+			log.save()
+			
+			if IsAdmin:
+				allcomments = Comments.objects.filter(NID = News.objects.filter(writerID = UID).all())
+				context_dict = {'username':request.session['username'], 'allcomments': allcomments}
+				return render(request, 'CommentsList.html', context_dict)	
+			
+		else:
+			context_dict = {'username': uname, 'username':request.session['username']}
+			return render(request, 'AccessDenied.html', context_dict)
+	
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
+
+#Add Comment
+def CommentsAdd(request, offset):
 	try:
 		offset = int(offset)
 	except ValueError:
@@ -190,37 +533,47 @@ def AddComment(request, offset):
 	context_dict = { 'posts' : posts, 'comments': comments, 'Sections': Sections}
 	return render(request, 'ShowNewsDetail.html', context_dict)
 
+# Other ###########################################################################################
 #Logout
 def Logout(request):
+	try:
+		del request.session['username']
+		#Log
+		userx = Users.objects.filter(username = uname).first()
+		log = Logs(UID = userx, eventname = "User Logout." ,eventdetail = "A User Logout From System.")
+		log.save()
+		
+	except:
+		pass
 	Sections = NewsSection.objects.order_by('id')
 	MaxID = News.objects.aggregate(maxid = Max('id'))['maxid']
 	LastNews = News.objects.filter(id = MaxID)
 	context_dict = { 'Sections' : Sections, 'LastNews': LastNews}
 	return render(request, 'Homepage.html', context_dict)
 
-#Add user
-def UserAdd(request):
-	if request.method == 'POST':
-        #getting values from post
-		uname = request.POST.get('username')
-		upass = request.POST.get('password')
-		uemail = request.POST.get('email')
-		user = Users(username = uname, password = upass, email = uemail, isadmin = 'False', )
-		user.save()
+#Show Contact Page
+def ContactUs(request):
+	Sections = NewsSection.objects.order_by('id')
+	return render(request, 'ContactUs.html', {'Sections': Sections})
+
+#Show Log List
+def LogsList(request):
+	if request.session.has_key('username'):
+		uname = request.session['username']
 		
-	UserList = Users.objects.order_by('id')
-	context_dict = { 'userlist' : UserList}
-	return render(request, 'UsersList.html', context_dict)
+		IsAdmin = Users.objects.filter(username = uname).get()
+		if IsAdmin.isadmin == 1:
+			events = Logs.objects.order_by('-id')
+			UserList = Users.objects.order_by('id')
+			context_dict = {'events': events, 'UserList': UserList, 'username': uname}
+			return render(request, 'LogsList.html', context_dict)
+		else:
+			context_dict = {'username': uname}
+			return render(request, 'AccessDenied.html', context_dict)
 	
-#Delete user
-def UserDel(request, offset):
-	try:
-		offset = int(offset)
-	except ValueError:
-		raise Http404()
+	else:
+		Sections = NewsSection.objects.order_by('id')
+		random = randint(1, 9)
+		context_dict = {'Sections': Sections, 'Random': random}
+		return render(request, 'Login.html', context_dict)
 	
-	Users.objects.filter(id = offset).delete()
-	
-	UserList = Users.objects.order_by('id')
-	context_dict = { 'userlist' : UserList}
-	return render(request, 'UsersList.html', context_dict)

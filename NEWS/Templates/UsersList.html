@@ -25,6 +25,7 @@
     
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+		<li><a href="/Login/">کاربر {{ username }}</a></li>
 		<li><a href="/Logout/">خروج</a></li>
 		<li><a href="/">خانه</a></li>
       </ul>
@@ -51,7 +52,7 @@
 			<td>{{ user.username }}</td>
 			<td>{{ user.email }}</td>
 			<td>{{ user.lastlogin }}</td>
-			<td> <a href="/EditUser/{{ user.id }}/"> ویرایش</a> &nbsp;&nbsp; <a href="/UserDel/{{ user.id }}/">پاک کردن</a></td>
+			<td><a href="/UserDel/{{ user.id }}/">پاک کردن</a></td>
 			</tr>
 		{% endfor %}
     </tbody>

@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>User Portal</title>
+  <title>مدیریت اخبار و نظرات</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -34,22 +34,26 @@
   </b>
 </nav>
 
-<!-- First Container -->
-<div class="container-fluid bg-1 text-center">
-  <h3>خوش آمدید</h3>
-  <ul >
-		<li><a href="/UsersList/">مدیریت کاربران</a></li>		
-		<li><a href="/SectionList/">مدیریت بخش های خبری</a></li>
-		<li><a href="/NewsList/">مدیریت اخبار</a></li>
-		<li><a href="/CommentsList/">مدیریت نظرات</a></li>
-		<li><a href="/LogsList/">مشاهده لاگ فعالیت کاربران</a></li>
-		<li><a href="/ChangePass/">تغییر رمز عبور</a></li>
-  </ul>
-</div>
-
 <!-- Second Container -->
 <div class="container-fluid bg-2 text-center">
   
+  <h3 class="margin">ویرایش خبر</h3>
+	  <form name="LoginForm" action="/NewsEditFinal/" method="POST">
+	  {% csrf_token %}
+	  {% for new in news%}
+	  <label for="ID" name="ID" value="{{new.id}}">{{new.id}}</label>
+	  <div class="form-group">
+		<label for="Title">عنوان خبر</label>
+		<input type="text" class="form-control" name="newstitle" value="{{new.title}}"></input>
+	  </div>
+	  <div class="form-group">
+		<label for="Text">متن خبر</label>
+		<textarea class="form-control" rows="5" id="comment" name="newstext">{{new.text}}</textarea>
+	  </div>
+	  
+	  <button type="submit" class="btn btn-default">ویرایش خبر</button>
+	  {% endfor %}
+	  </form>
 </div>
 
 <!-- Footer -->

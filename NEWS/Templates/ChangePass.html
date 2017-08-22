@@ -25,6 +25,7 @@
     
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+		<li><a href="/Login/">کاربر {{ username }}</a></li>
 		<li><a href="/Logout/">خروج</a></li>
 		<li><a href="/">خانه</a></li>
       </ul>
@@ -32,6 +33,15 @@
   </div>
   </b>
 </nav>
+
+<!-- Second Container -->
+<div class="container-fluid bg-2 text-center">
+  {% if Result == 0 %}
+	<p>Password Change Error!</p>
+  {% elif Result == 1 %}
+	<p>Password Changed Successfuly!</p>
+  {% endif %}
+</div>
 
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center">
@@ -41,19 +51,14 @@
 	  {% csrf_token %}
 	  <div class="form-group">
 		<label for="pwd">کلمه عبور جدید</label>
-		<input type="password" class="form-control" name="password">
+		<input type="password" class="form-control" name="password1">
 	  </div>
 	  <div class="form-group">
 		<label for="pwd">تکرار کلمه عبور</label>
-		<input type="password" class="form-control" name="password">
+		<input type="password" class="form-control" name="password2">
 	  </div>
 	  <button type="submit" class="btn btn-default">اعمال تغییرات</button>
 	  </form> 
-</div>
-
-<!-- Second Container -->
-<div class="container-fluid bg-2 text-center">
-  
 </div>
 
 <!-- Footer -->

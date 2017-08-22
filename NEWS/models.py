@@ -6,7 +6,7 @@ class Users(models.Model):
 	username = models.CharField(max_length=50)
 	password = models.CharField(max_length=50)
 	email = models.CharField(max_length=50)
-	isadmin = models.BooleanField()
+	isadmin = models.PositiveIntegerField(default=0)
 	lastlogin = models.DateTimeField(default=timezone.now)
 	def __unicode__(self):
 		return u'%s %s %s' % (self.username, self.password, self.email)
@@ -40,7 +40,7 @@ class Logs(models.Model):
 	UID = models.ForeignKey('Users', on_delete = models.CASCADE)
 	eventname = models.CharField(max_length=50)
 	eventdetail = models.CharField(max_length=100)
-	eventdate = models.DateTimeField()
+	eventdate = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
 		return u'%s %s' % (self.eventname, self.eventdetail)
 

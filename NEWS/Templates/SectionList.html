@@ -25,6 +25,7 @@
     
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+		<li><a href="/Login/">کاربر {{ username }}</a></li>
 		<li><a href="/Logout/">خروج</a></li>
 		<li><a href="/">خانه</a></li>
       </ul>
@@ -55,7 +56,7 @@
 				{% endif %}
 			{% endfor %}
 			<td>{{ section.SLogo }}</td>
-			<td> <a href="/SectionEdit/{{ section.id }}/"> ویرایش</a> &nbsp;&nbsp; <a href="/SectionDel/{{ section.id }}/">پاک کردن</a></td>
+			<td><a href="/SectionDel/{{ section.id }}/">پاک کردن</a></td>
 			</tr>
 		{% endfor %}
     </tbody>

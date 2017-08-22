@@ -55,7 +55,7 @@
 <div class="container-fluid bg-2 text-center">
 	{% for lastnews in LastNews %}
 	  <h3 class="margin">آخرین خبر</h3>
-	  <img src="{% static 'CSS/Resource/Mig.jpg' %}" class="img-responsive img-circle margin" style="display:inline" alt="عکس در دسترس نیست!" width="250" height="250">
+	  <img src="{{ static }}"/{{ lastnews.image }} class="img-responsive img-circle margin" style="display:inline" alt="عکس در دسترس نیست!" width="250" height="250">
 	  <h3 dir=rtl>{{ lastnews.title}}</h3>
 	{% endfor %}
 </div>

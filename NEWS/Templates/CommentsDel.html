@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>User Portal</title>
+  <title>مدیریت نظرات</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -36,16 +36,52 @@
 
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center">
-  <h3>خوش آمدید</h3>
-  <ul >
-		<li><a href="/UsersList/">مدیریت کاربران</a></li>		
-		<li><a href="/SectionList/">مدیریت بخش های خبری</a></li>
-		<li><a href="/NewsList/">مدیریت اخبار</a></li>
-		<li><a href="/CommentsList/">مدیریت نظرات</a></li>
-		<li><a href="/LogsList/">مشاهده لاگ فعالیت کاربران</a></li>
-		<li><a href="/ChangePass/">تغییر رمز عبور</a></li>
-  </ul>
-</div>
+<h3>مدیریت نظرات کاربران</h3>
+{% for u in uname %}
+	{{ u.name}}
+{% endfor %}
+  <table class="table table-hover text-center">
+    <thead>
+      <tr>
+        <th class="text-center">نام کاربر</th>
+        <th class="text-center">شرح نظر</th>
+		<th class="text-center">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="text-center">
+		{% for section in Sections %}
+			{%for news in allnews %}
+			<tr>
+			<td>{{ section.Stitle }}</td>
+			
+				{% if section.SAdmin == user %}
+					<td>{{ user.username }}</td>
+				{% endif %}
+			{% endfor %}
+			<td>{{ section.SLogo }}</td>
+			<td> <a href="/SectionEdit/{{ section.id }}/"> ویرایش</a> &nbsp;&nbsp; <a href="/SectionDel/{{ section.id }}/">پاک کردن</a></td>
+			</tr>
+		{% endfor %}
+		
+    </tbody>
+  </table>
+  <hr/>
+  <h3 class="margin">ساخت بخش خبری جدید</h3>
+	  <form name="LoginForm" action="/SectionAdd/" method="POST">
+	  {% csrf_token %}
+	  <div class="form-group">
+		<label for="username">نام بخش خبری</label>
+		<input type="text" class="form-control" name="secname">
+	  </div>
+	  <div class="form-group">
+		<label for="pwd">نام سردبیر بخش خبری</label>
+			{%for user in userlist %}
+				<div class="checkbox rtl">
+					<label><input type="checkbox" value="{{ user.id }}" name="checks">{{ user.username }}</label>
+				</div>
+			{% endfor %}
+	  </div>
+	  </form>
 
 <!-- Second Container -->
 <div class="container-fluid bg-2 text-center">
